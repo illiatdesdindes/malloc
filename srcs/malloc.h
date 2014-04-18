@@ -6,21 +6,24 @@
 /*   By: svachere <svachere@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2014/04/18 15:01:39 by svachere          #+#    #+#             */
-/*   Updated: 2014/04/18 19:18:15 by svachere         ###   ########.fr       */
+/*   Updated: 2014/04/18 20:11:06 by svachere         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MALLOC_H
 # define MALLOC_H
 # include <unistd.h>
+# include <sys/mman.h>
 # define TINY_FACTOR 8
 # define SMALL_FACTOR 16
+# define TINY_ZONE TINY_FACTOR * getpagesize()
+# define SMALL_ZONE SMALL_FACTOR * getpagesize()
 # define ALIGN(x) (((((x) - 1) >> 3) << 3) + 8)
 
 typedef struct	s_block
 {
-	struct s_block	*next;
 	size_t			size;
+	struct s_block	*next;
 	int				free;
 	char			data[1];
 }				t_block;

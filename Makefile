@@ -6,7 +6,7 @@
 #    By: svachere <svachere@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/11/19 12:04:58 by svachere          #+#    #+#              #
-#    Updated: 2014/04/18 14:51:43 by svachere         ###   ########.fr        #
+#    Updated: 2014/04/18 20:11:06 by svachere         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,9 +33,9 @@ all: $(NAME)
 
 $(NAME): env_vars objs $(LIBS) $(OBJS)
 	$(CC) -shared -o $(NAME) $(OBJS) $(LDFLAGS)
+	ln -s $(NAME) $(NAMELN)
 
 env_vars:
-	ln -s $(NAME) $(NAMELN)
 	export DYLD_LIBRARY_PATH=.
 	export DYLD_INSERT_LIBRARIES=$(NAMELN)
 	export DYLD_FORCE_FLAT_NAMESPACE=1
@@ -58,6 +58,7 @@ fclean: clean
 	$(MAKE) -C libft/ $@
 	#$(MAKE) -C printf/ $@
 	/bin/rm -f $(NAME)
+	/bin/rm -f $(NAMELN)
 
 re: fclean all
 

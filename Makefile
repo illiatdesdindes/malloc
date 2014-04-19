@@ -6,7 +6,7 @@
 #    By: svachere <svachere@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/11/19 12:04:58 by svachere          #+#    #+#              #
-#    Updated: 2014/04/18 20:11:06 by svachere         ###   ########.fr        #
+#    Updated: 2014/04/19 19:52:24 by svachere         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,10 @@ NAME = libft_malloc_$(HOSTTYPE).so
 NAMELN = libft_malloc.so
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g
-SRCSFILES = malloc.c
+SRCSFILES = malloc.c \
+			m_find_block.c \
+			m_split_block.c \
+			free.c
 SRCSDIR = srcs/
 SRCS = $(addprefix $(SRCSDIR), $(SRCSFILES))
 OBJSDIR = objs/
@@ -29,11 +32,13 @@ HEADERFLAGS = $(addprefix -I, $(dir $(HEADERS)))
 LIBS = libft/libft.a
 LDFLAGS = -L libft/ -lft
 
-all: $(NAME)
+all: $(NAME) $(NAMELN)
+
+$(NAMELN):
+	ln -s $(NAME) $(NAMELN)
 
 $(NAME): env_vars objs $(LIBS) $(OBJS)
 	$(CC) -shared -o $(NAME) $(OBJS) $(LDFLAGS)
-	ln -s $(NAME) $(NAMELN)
 
 env_vars:
 	export DYLD_LIBRARY_PATH=.
@@ -61,6 +66,10 @@ fclean: clean
 	/bin/rm -f $(NAMELN)
 
 re: fclean all
+
+t: $(LIBS) $(OBJS)
+	$(CC) $(CFLAGS) $(HEADERFLAGS) -c -o objs/main_.o srcs/main_.c
+	$(CC) $(OBJS) objs/main_.o $(LDFLAGS)
 
 libftinstall:
 	mkdir libft

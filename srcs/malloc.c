@@ -6,53 +6,52 @@
 /*   By: svachere <svachere@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2014/04/18 14:52:09 by svachere          #+#    #+#             */
-/*   Updated: 2014/04/18 20:11:21 by svachere         ###   ########.fr       */
+/*   Updated: 2014/04/19 20:13:49 by svachere         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <malloc.h>
 
-extern t_mem	g_mem;
 
-void	m_init_tinies()
+t_block	*m_init_zone(size_t zone_size)
 {
-	char	*tinies;
-	t_block	prev;
-	t_block	curr = {g_mem.sizetiny, NULL, 1, {}};
-	int		i;
+	t_block	*head;
 
-	tinies = mmap(0, TINY_ZONE, PROT_READ | PROT_WRITE,
+	head = mmap(0, zone_size, PROT_READ | PROT_WRITE,
 					MAP_ANON | MAP_PRIVATE, -1, 0);
-	i = 0;
-	while (i < 100)
-	{
-		*(tinies + (i * (g_mem.sizetiny + sizeof(t_block)))) =; 
-	}
-}
-
-void	m_init_smalles();
-{
-	void	*smalles;
-
-	smalles = mmap(0, SMALL_ZONE, PROT_READ | PROT_WRITE,
-					MAP_ANON | MAP_PRIVATE, -1, 0);
+	head->size = zone_size - sizeof(t_block);
+	head->next = NULL;
+	head->prev = NULL;
+	head->free = 1;
+	return (head);
 }
 
 void	m_init(size_t size)
 {
-	if (g_mem.sizetiny == 0)
+	static int	init = 0;
+	if (init == 0)
 	{
-		g_mem.sizetiny = TINY_FACTOR * getpagesize() / 100 - sizeof(t_block);
-		g_mem.sizesmall = SMALL_FACTORE * getpagesize() / 100 - sizeof(t_block);
+		g_mem.tinies = NULL;
+		g_mem.smalles = NULL;
+		g_mem.larges = NULL;
+		init = 1;
 	}
-	if (size <= g_mem.sizetiny && g_mem.tinies == NULL)
-		m_init_tinies();
-	if (size <= g_mem.sizesmall && g_mem.smalles == NULL)
-		m_init_smalles();
+	if (g_mem.tinies == NULL && size <= TINY_DATA)
+		g_mem.tinies = m_init_zone(TINY_ZONE);
+	else if (g_mem.smalles == NULL && size <= SMALL_DATA)
+		g_mem.smalles = m_init_zone(SMALL_ZONE);
 }
 
 void	*malloc(size_t size)
 {
-	size = align4(size);
+	t_block	*found;
+
+	size = ALIGN(size);
 	m_init(size);
+	found = m_find_block(size);
+	if (found == NULL)
+		return (NULL);
+	found->free = 0;
+	m_split_block(found, size);
+	return ((void*)(((char*)found) + sizeof(t_block)));
 }
